@@ -25,6 +25,7 @@ import {
 } from "./ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscription";
 
 export const AppSidebar = () => {
   const menuItems = [
@@ -51,6 +52,8 @@ export const AppSidebar = () => {
   ];
   const router = useRouter();
   const pathname = usePathname();
+  const { hasActiveSubscription, isLoading, subscription } =
+    useHasActiveSubscription();
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -94,21 +97,23 @@ export const AppSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Upgrade To Tooltip"
-              className="gap-x-4 px-4 h-10"
-              onClick={() => {}}
-            >
-              <StarIcon className="size-4" />
-              <span>Upgrade To Pro</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {!hasActiveSubscription && !isLoading && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Upgrade To Tooltip"
+                className="gap-x-4 px-4 h-10"
+                onClick={() => authClient.checkout({ slug: "pro" })}
+              >
+                <StarIcon className="size-4" />
+                <span>Upgrade To Pro</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Billing Portal"
               className="gap-x-4 px-4 h-10"
-              onClick={() => {}}
+              onClick={() => authClient.customer.portal()}
             >
               <CreditCardIcon className="size-4" />
               <span>Billing Portal</span>
