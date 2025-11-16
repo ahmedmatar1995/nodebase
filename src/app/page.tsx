@@ -18,6 +18,17 @@ function page() {
       },
     })
   );
+  const generateAI = useMutation(
+    trpc.testAI.mutationOptions({
+      onSuccess: (data) => {
+        console.log(data);
+      },
+      onError: () => {
+        toast.error("something went wrong");
+      },
+    })
+  );
+
   return (
     <div>
       <p>home page</p>
@@ -29,6 +40,15 @@ function page() {
         disabled={create.isPending}
       >
         create workflow
+      </Button>
+
+      <Button
+        variant="outline"
+        className="rounded px-4 font-semibold capitalize"
+        onClick={() => generateAI.mutate()}
+        disabled={generateAI.isPending}
+      >
+        generate text
       </Button>
 
       <Logout />
