@@ -6,6 +6,7 @@ import {
 } from "@/trpc/init";
 import { z } from "zod";
 import { generateSlug } from "random-word-slugs";
+import { PAGINATION } from "@/config/constants";
 
 export const workFlowsRouter = createTRPCRouter({
   create: premiumProcedure.mutation(async ({ ctx }) => {
@@ -50,13 +51,59 @@ export const workFlowsRouter = createTRPCRouter({
       });
     }),
 
-  getWorkFlows: protectedProcedure.query(async ({ ctx }) => {
-    return await prisma.workFlow.findMany({
-      where: {
-        userId: ctx.auth.user.id,
-      },
-    });
-  }),
+  getWorkFlows: protectedProcedure
+    .input(
+      z.object({
+        page: z.number().default(PAGINATION.DEFAULT_PAGE),
+        pageSize: z
+          .number()
+          .min(PAGINATION.MIN_PAGE_SIZE)
+          .max(PAGINATION.MAX_PAGE_SIZE)
+          .default(PAGINATION.DEFAULT_PAGE_SIZE),
+        search: z.string().default(""),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { search, page, pageSize } = input;
+      const [items, totalCount] = await Promise.all([
+        await prisma.workFlow.findMany({
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          where: {
+            userId: ctx.auth.user.id,
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        }),
+        await prisma.workFlow.count({
+          where: {
+            userId: ctx.auth.user.id,
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        }),
+      ]);
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const hasNextPage = page > totalPages;
+      const hasPreviousPage = page > 1;
+
+      return {
+        items,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+        page,
+        pageSize,
+      };
+    }),
   getWorkFlow: protectedProcedure
     .input(
       z.object({
