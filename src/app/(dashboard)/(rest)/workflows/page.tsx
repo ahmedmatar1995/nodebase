@@ -2,7 +2,9 @@ import React, { Suspense } from "react";
 import { requireAuth } from "@/lib/auth-utils";
 import {
   WorkFlowsContainer,
+  WorkFlowsError,
   WorkFlowsList,
+  WorkFlowsLoading,
 } from "@/features/workflows/components/workflows";
 import { prefetchWorkFlows } from "@/features/workflows/server/prefetch";
 import { HydrateClient } from "@/trpc/server";
@@ -18,11 +20,12 @@ async function page({ searchParams }: Props) {
   await requireAuth();
   const params = await workFlowsParamsLoader(searchParams);
   prefetchWorkFlows(params);
+
   return (
     <WorkFlowsContainer>
       <HydrateClient>
-        <ErrorBoundary fallback={<p>Error!</p>}>
-          <Suspense fallback={<p>Loading...</p>}>
+        <ErrorBoundary fallback={<WorkFlowsError />}>
+          <Suspense fallback={<WorkFlowsLoading />}>
             <WorkFlowsList />
           </Suspense>
         </ErrorBoundary>
