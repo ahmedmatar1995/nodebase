@@ -1,11 +1,7 @@
-import React from 'react';
-import { RegisterForm } from '@/features/auth/components/register-form';
-
+import { RegisterForm } from "@/features/auth/components/register-form";
 
 function page() {
-    return (
-        <RegisterForm />
-    )
+  return <RegisterForm />;
 }
 
-export default page
+export default page;
