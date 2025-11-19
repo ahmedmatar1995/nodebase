@@ -32,3 +32,26 @@ export const useCreateWorkFlow = () => {
     })
   );
 };
+
+export const useRemoveWorkFlow = () => {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    trpc.workflows.remove.mutationOptions({
+      onSuccess: (data) => {
+        console.log(data);
+        toast.success(`WorkFlow "${data.name}" has been removed`);
+        queryClient.invalidateQueries(
+          trpc.workflows.getWorkFlows.queryOptions({})
+        );
+        queryClient.invalidateQueries(
+          trpc.workflows.getWorkFlow.queryFilter({ id: data.id })
+        );
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    })
+  );
+};
