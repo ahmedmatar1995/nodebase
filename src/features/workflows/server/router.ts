@@ -7,6 +7,7 @@ import {
 import { z } from "zod";
 import { generateSlug } from "random-word-slugs";
 import { PAGINATION } from "@/config/constants";
+import { TRPCError } from "@trpc/server";
 
 export const workFlowsRouter = createTRPCRouter({
   create: premiumProcedure.mutation(async ({ ctx }) => {
@@ -111,7 +112,7 @@ export const workFlowsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return await prisma.workFlow.findFirst({
+      return prisma.workFlow.findUniqueOrThrow({
         where: {
           id: input.id,
           userId: ctx.auth.user.id,

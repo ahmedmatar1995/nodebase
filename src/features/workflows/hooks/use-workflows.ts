@@ -11,6 +11,11 @@ export const useSuspenseWorkFlows = () => {
   return useSuspenseQuery(trpc.workflows.getWorkFlows.queryOptions(params));
 };
 
+export const useSuspenseWorkFlow = (id: string) => {
+  const trpc = useTRPC();
+  return useSuspenseQuery(trpc.workflows.getWorkFlow.queryOptions({ id }));
+};
+
 export const useCreateWorkFlow = () => {
   const router = useRouter();
   const trpc = useTRPC();
@@ -51,6 +56,28 @@ export const useRemoveWorkFlow = () => {
       },
       onError: (error) => {
         toast.error(error.message);
+      },
+    })
+  );
+};
+
+export const useUpdateWorkFlow = () => {
+  const trpc = useTRPC();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  return useMutation(
+    trpc.workflows.updateName.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`WorkFlow "${data.name}" has been updated`);
+        queryClient.invalidateQueries(
+          trpc.workflows.getWorkFlows.queryOptions({})
+        );
+        queryClient.invalidateQueries(
+          trpc.workflows.getWorkFlow.queryOptions({ id: data.id })
+        );
+      },
+      onError: (error) => {
+        toast.error(`Failed to Update Workflow ${error.message}`);
       },
     })
   );
