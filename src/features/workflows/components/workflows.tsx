@@ -123,6 +123,7 @@ export const WorkFlowsEmpty = () => {
   const handleCreate = () => {
     createWorkFlow.mutate(undefined, {
       onError: (error) => {
+        console.log(error);
         handleError(error);
       },
     });
